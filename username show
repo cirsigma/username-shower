@@ -1,0 +1,59 @@
+local Players = game:GetService("Players")
+
+-- Function to create the custom name tag
+local function createNameTag(player)
+    -- Ensure character exists
+    local character = player.Character or player.CharacterAdded:Wait()
+
+    -- Check for an existing BillboardGui to avoid duplicates
+    if character:FindFirstChild("NameTag") then
+        character.NameTag:Destroy()
+    end
+
+    -- Create a BillboardGui for the name tag
+    local billboardGui = Instance.new("BillboardGui")
+    billboardGui.Name = "NameTag"
+    billboardGui.Adornee = character:WaitForChild("Head")  -- Attach to head
+    billboardGui.Size = UDim2.new(4, 0, 1, 0)  -- Increased size
+    billboardGui.StudsOffset = Vector3.new(0, 2.5, 0)  -- Position slightly higher above head
+    billboardGui.AlwaysOnTop = true
+
+    -- Create a TextLabel to display the name
+    local nameLabel = Instance.new("TextLabel")
+    nameLabel.Size = UDim2.new(1, 0, 1, 0)
+    nameLabel.BackgroundTransparency = 1
+    nameLabel.TextColor3 = Color3.new(1, 0, 0)  -- Red text color
+    nameLabel.Font = Enum.Font.SourceSansBold
+    nameLabel.TextSize = 24  -- Larger text size
+    nameLabel.Text = "[" .. player.DisplayName .. "](" .. player.Name .. ")"  -- Format the text
+    nameLabel.Parent = billboardGui
+
+    -- Parent the BillboardGui to the character's head
+    billboardGui.Parent = character
+end
+
+-- Function to set up or refresh name tags for all players
+local function refreshNameTags()
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= Players.LocalPlayer then  -- Avoid creating tag for self
+            createNameTag(player)
+        end
+    end
+end
+
+-- Clear all name tags to avoid stacking
+local function clearNameTags()
+    for _, player in pairs(Players:GetPlayers()) do
+        local character = player.Character
+        if character and character:FindFirstChild("NameTag") then
+            character.NameTag:Destroy()
+        end
+    end
+end
+
+-- Refresh name tags every 10 seconds
+while true do
+    clearNameTags()  -- Clear any existing name tags
+    refreshNameTags()  -- Recreate name tags for all players
+    wait(10)  -- Wait 10 seconds before refreshing again
+end
